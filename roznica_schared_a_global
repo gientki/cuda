@@ -1,0 +1,146 @@
+#include<iostream>
+#include<cstdlib>
+#include<cuda_runtime.h>
+
+using namespace std;
+
+#define size 1024
+#define THREADS_PER_BLOCK 256
+#define BLOCKS ((size + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK)
+
+
+
+__global__ void sruchom(int* a, int* c) {
+	int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+	__shared__ int temp[THREADS_PER_BLOCK + 2];
+
+	if (idx < size)
+	{
+		temp[threadIdx.x + 1] = a[idx];
+
+		if (threadIdx.x + 1 == 0 && idx > 0)
+			temp[0] = a[idx - 1];
+
+		if (threadIdx.x == blockDim.x - 1 && idx < size - 1)
+			temp[threadIdx.x + 2] = a[idx + 1];
+
+	}
+		
+	__syncthreads(); 
+	if (idx < size)
+	{
+		if (idx > 0 && idx < size - 1) {
+			c[idx] = (temp[threadIdx.x + 2] + temp[threadIdx.x] + temp[threadIdx.x + 1]) / 3.0f;
+		}
+		else {
+			c[idx] = a[idx];
+		}
+	}
+}
+
+
+__global__ void gruchom(int* a, int* c) {
+	int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+	if (idx < size) {
+		if (idx > 0 && idx < size - 1) {
+			c[idx] = (a[idx - 1] + a[idx] + a[idx + 1]) / 3.0f;
+		}
+		else {
+			c[idx] = a[idx];
+		}
+	}
+}
+void sprawdzCzas(void (*kernel)(const int*, int*), const char* opis, int* d_a, int* d_c) {
+	cudaEvent_t start, stop;
+	float czas = 0;
+
+	cudaEventCreate(&start);
+	cudaEventCreate(&stop);
+
+	cudaEventRecord(start);
+
+	kernel << <BLOCKS, THREADS_PER_BLOCK >> > (d_a, d_c);
+
+	cudaEventRecord(stop);
+	cudaEventSynchronize(stop);
+	cudaEventElapsedTime(&czas, start, stop);
+
+	cout << opis << ": " << czas << " ms" << endl;
+
+	cudaEventDestroy(start);
+	cudaEventDestroy(stop);
+}
+int main()
+{
+	const int blocks = 1;
+
+	int h_a0[size];
+	int h_c0[size];
+
+	int h_a1[size];
+	int h_c1[size];
+
+	for (int i = 0; i < size; i++)
+	{
+		h_a0[i] = i;
+		h_a1[i] = i;
+	}
+	
+	int* d_a0, * d_c0;
+	int* d_a1, * d_c1;
+	
+	
+	cudaMalloc((void**)&d_a0, size * sizeof(int));
+	cudaMalloc((void**)&d_c0, size * sizeof(int));
+
+	cudaMalloc((void**)&d_a1, size * sizeof(int));
+	cudaMalloc((void**)&d_c1, size * sizeof(int));
+
+	/*cout << d_a << endl;*/
+	cudaMemcpy(d_a0, h_a0, size * sizeof(int), cudaMemcpyHostToDevice);
+
+	cudaMemcpy(d_a1, h_a1, size * sizeof(int), cudaMemcpyHostToDevice);
+	
+	/*addKernel<<<blocks, size/blocks>>>(d_a, d_b, d_c);*/
+	// Pomiar czasu shared
+	cudaEvent_t start, stop;
+	float czas = 0;
+
+	// Shared memory
+	cudaEventCreate(&start);
+	cudaEventCreate(&stop);
+	cudaEventRecord(start);
+	sruchom << <BLOCKS, THREADS_PER_BLOCK >> >(d_a0, d_c0);
+	cudaEventRecord(stop);
+	cudaEventSynchronize(stop);
+	cudaEventElapsedTime(&czas, start, stop);
+	cout << "Czas z uzyciem shared memory: " << czas << " ms" << endl;
+
+	// Global memory
+	cudaEventRecord(start);
+	gruchom << <BLOCKS, THREADS_PER_BLOCK >> > (d_a1, d_c1);
+	cudaEventRecord(stop);
+	cudaEventSynchronize(stop);
+	cudaEventElapsedTime(&czas, start, stop);
+	cout << "Czas z uzyciem global memory: " << czas << " ms" << endl;
+
+	cudaMemcpy(h_c0, d_c0, size * sizeof(int), cudaMemcpyDeviceToHost);
+	cudaMemcpy(h_c1, d_c1, size * sizeof(int), cudaMemcpyDeviceToHost);
+	
+
+	/*for (int i = 0; i < size; i++)
+		cout << i << ':' << h_c1[i] << ' ' << h_c0[i]<< endl;*/
+
+	cudaError_t err = cudaGetLastError();
+	if (err != cudaSuccess) {
+		cout << "CUDA Error: " << cudaGetErrorString(err) << endl;
+	}
+	cudaFree(d_a0);
+	cudaFree(d_c0);
+
+	cudaFree(d_a1);
+	cudaFree(d_c1);
+		return 0;
+}
