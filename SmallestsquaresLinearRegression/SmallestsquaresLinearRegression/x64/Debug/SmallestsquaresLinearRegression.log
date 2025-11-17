@@ -1,0 +1,11 @@
+﻿  Compiling CUDA source file kernel.cu...
+  
+  C:\Users\swete\source\repos\SmallestsquaresLinearRegression\SmallestsquaresLinearRegression>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.2\bin\nvcc.exe" -gencode=arch=compute_60,code=\"sm_60,compute_60\" --use-local-env -ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\bin\HostX64\x64" -x cu   -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.2\include"  -G   --keep-dir x64\Debug  -maxrregcount=0   --machine 64 --compile -cudart static -allow-unsupported-compiler -g  -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /FS /Zi /RTC1 /MDd " -Xcompiler "/Fdx64\Debug\vc143.pdb" -o C:\Users\swete\source\repos\SmallestsquaresLinearRegression\SmallestsquaresLinearRegression\x64\Debug\kernel.cu.obj "C:\Users\swete\source\repos\SmallestsquaresLinearRegression\SmallestsquaresLinearRegression\kernel.cu" 
+  kernel.cu
+  tmpxft_00004cf8_00000000-7_kernel.cudafe1.cpp
+C:\Users\swete\source\repos\SmallestsquaresLinearRegression\SmallestsquaresLinearRegression\kernel.cu(59): warning C4244: "=": konwersja z "double" do "float", możliwa utrata danych
+C:\Users\swete\source\repos\SmallestsquaresLinearRegression\SmallestsquaresLinearRegression\kernel.cu(60): warning C4244: "=": konwersja z "double" do "float", możliwa utrata danych
+C:\Users\swete\source\repos\SmallestsquaresLinearRegression\SmallestsquaresLinearRegression\kernel.cu(241): warning C4244: "=": konwersja z "double" do "float", możliwa utrata danych
+C:\Users\swete\source\repos\SmallestsquaresLinearRegression\SmallestsquaresLinearRegression\kernel.cu(242): warning C4244: "=": konwersja z "double" do "float", możliwa utrata danych
+C:\Users\swete\source\repos\SmallestsquaresLinearRegression\SmallestsquaresLinearRegression\kernel.cu(289): warning C4244: "argument": konwersja z "double" do "int", możliwa utrata danych
+  SmallestsquaresLinearRegression.vcxproj -> C:\Users\swete\source\repos\SmallestsquaresLinearRegression\x64\Debug\SmallestsquaresLinearRegression.exe
